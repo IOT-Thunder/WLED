@@ -65,9 +65,10 @@ void WLED::loop()
   yield();
   handleIO();
   handleIR();
-  #ifndef WLED_DISABLE_ALEXA
   handleAlexa();
-  #endif
+  //#ifndef WLED_DISABLE_ALEXA
+  //handleAlexa();
+  //#endif
 
   yield();
 

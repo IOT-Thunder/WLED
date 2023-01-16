@@ -173,7 +173,7 @@ using PSRAMDynamicJsonDocument = BasicJsonDocument<PSRAM_Allocator>;
 #endif
 
 #ifndef CLIENT_PASS
-  #define CLIENT_PASS ""
+  #define CLIENT_PASS DEFAULT_CLIENT_PASS
 #endif
 
 #if defined(WLED_AP_PASS) && !defined(WLED_AP_SSID)

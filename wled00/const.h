@@ -8,10 +8,11 @@
 #define GRADIENT_PALETTE_COUNT 58
 
 //Defaults
-#define DEFAULT_CLIENT_SSID "Your_Network"
-#define DEFAULT_AP_SSID     "WLED-AP"
-#define DEFAULT_AP_PASS     "wled1234"
-#define DEFAULT_OTA_PASS    "wledota"
+#define DEFAULT_CLIENT_SSID "hitesh_home_airtel"
+#define DEFAULT_CLIENT_PASS "sia@2017@sia"
+#define DEFAULT_AP_SSID     "hitesh_home_wled"
+#define DEFAULT_AP_PASS     "sia@2017@sia"
+#define DEFAULT_OTA_PASS    "sia@2017@sia"
 
 //increase if you need more
 #ifndef WLED_MAX_USERMODS
