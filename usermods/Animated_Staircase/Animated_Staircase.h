@@ -14,15 +14,15 @@ class Animated_Staircase : public Usermod {
   private:
 
     /* configuration (available in API and stored in flash) */
-    bool enabled = false;                   // Enable this usermod
+    bool enabled = true;                   // Enable this usermod
     unsigned long segment_delay_ms = 150;   // Time between switching each segment
     unsigned long on_time_ms       = 30000; // The time for the light to stay on
-    int8_t topPIRorTriggerPin      = -1;    // disabled
-    int8_t bottomPIRorTriggerPin   = -1;    // disabled
+    int8_t topPIRorTriggerPin      = D3;    // disabled
+    int8_t bottomPIRorTriggerPin   = D5;    // disabled
     int8_t topEchoPin              = -1;    // disabled
     int8_t bottomEchoPin           = -1;    // disabled
-    bool useUSSensorTop            = false; // using PIR or UltraSound sensor?
-    bool useUSSensorBottom         = false; // using PIR or UltraSound sensor?
+    bool useUSSensorTop            = true; // using PIR or UltraSound sensor?
+    bool useUSSensorBottom         = true; // using PIR or UltraSound sensor?
     unsigned int topMaxDist        = 50;    // default maximum measured distance in cm, top
     unsigned int bottomMaxDist     = 50;    // default maximum measured distance in cm, bottom
 
