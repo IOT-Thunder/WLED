@@ -22,7 +22,7 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
   if (subPage == 1)
   {
     strlcpy(clientSSID,request->arg(F("CS")).c_str(), 33);
-
+    strlcat(userId, request->arg(F("USER_ID")).c_str(), 33);
     if (!isAsterisksOnly(request->arg(F("CP")).c_str(), 65)) strlcpy(clientPass, request->arg(F("CP")).c_str(), 65);
 
     strlcpy(cmDNS, request->arg(F("CM")).c_str(), 33);

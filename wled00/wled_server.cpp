@@ -138,6 +138,7 @@ void initServer()
 
   //settings page
   server.on("/settings", HTTP_GET, [](AsyncWebServerRequest *request){
+    //TODO: DISABLED SETTINGS PAGE FOR USER
     serveSettings(request);
   });
 
@@ -174,6 +175,11 @@ void initServer()
   server.on("/settings", HTTP_POST, [](AsyncWebServerRequest *request){
     serveSettings(request, true);
   });
+
+  server.on("/update-wifi", HTTP_POST, [](AsyncWebServerRequest *request){
+    serveUpdateWifi(request);
+  });
+
 
   server.on("/json", HTTP_GET, [](AsyncWebServerRequest *request){
     serveJson(request);
@@ -340,6 +346,7 @@ void initServer()
     serveMessage(request, 501, "Not implemented", F("DMX support is not enabled in this build."), 254);
   });
   #endif
+  //TODO REMOVED INDEX PAGE
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
     if (captivePortal(request)) return;
     serveIndexOrWelcome(request);
@@ -465,6 +472,14 @@ String msgProcessor(const String& var)
   return String();
 }
 
+String msgProcessorWifi(const String& var)
+{
+  if(var == "MSG") {
+    String messageBody = ipAddress;
+  }
+  return String();
+}
+
 
 void serveMessage(AsyncWebServerRequest* request, uint16_t code, const String& headl, const String& subl, byte optionT)
 {
@@ -473,6 +488,33 @@ void serveMessage(AsyncWebServerRequest* request, uint16_t code, const String& h
   optionType = optionT;
 
   request->send_P(code, "text/html", PAGE_msg, msgProcessor);
+}
+
+void serveSuccessMessage(AsyncWebServerRequest* request, uint16_t code, const String& headl, const String& subl, byte optionT)
+{
+  messageHead = headl;
+  messageSub = subl;
+  optionType = optionT;
+  Serial.println("Wifi Status");
+  Serial.println(WiFi.status());
+  station_status_t status = wifi_station_get_connect_status();
+  Serial.println(status);
+  if(WLED_CONNECTED == WL_CONNECTED) {
+    ipAddress = WiFi.gatewayIP().toString();
+    Serial.print("ipAddress");
+    Serial.println(ipAddress);
+    request->send_P(code, "application/json", PAGE_msg_Wifi_SUCCESS, msgProcessorWifi);
+    strlcat(userId, request->arg(F("USER_ID")).c_str(), 33);
+    Serial.print("User-id : ");
+    Serial.println(userId);
+  } else {
+    request->send_P(500, "application/json", PAGE_msg_Wifi_FAILED, msgProcessorWifi);
+    strlcat(userId, request->arg(F("USER_ID")).c_str(), 33);
+    Serial.print("User-id : ");
+    Serial.println(userId);
+    //Serial.println(WiFi.status());
+  }
+  // TODO: Publish a mqtt message or call API to the server
 }
 
 
@@ -518,6 +560,64 @@ void serveSettingsJS(AsyncWebServerRequest* request)
   getSettingsJS(subPage, buf+strlen(buf));  // this may overflow by 35bytes!!!
   strcat_P(buf,PSTR("}"));
   request->send(200, "application/javascript", buf);
+}
+
+void serveUpdateWifi(AsyncWebServerRequest* request)
+{
+    const String& url = request->url();
+    strlcpy(clientSSID,request->arg(F("CS")).c_str(), 33);
+    strlcat(userId, request->arg(F("USER_ID")).c_str(), 33);
+    if (!isAsterisksOnly(request->arg(F("CP")).c_str(), 65)) strlcpy(clientPass, request->arg(F("CP")).c_str(), 65);
+    strlcpy(cmDNS, request->arg(F("CM")).c_str(), 33);
+
+    apBehavior = request->arg(F("AB")).toInt();
+    strlcpy(apSSID, request->arg(F("AS")).c_str(), 33);
+    apHide = request->hasArg(F("AH"));
+    int passlen = request->arg(F("AP")).length();
+    if (passlen == 0 || (passlen > 7 && !isAsterisksOnly(request->arg(F("AP")).c_str(), 65))) strlcpy(apPass, request->arg(F("AP")).c_str(), 65);
+    int t = request->arg(F("AC")).toInt(); if (t > 0 && t < 14) apChannel = t;
+
+    noWifiSleep = request->hasArg(F("WS"));
+
+    char k[3]; k[2] = 0;
+    for (int i = 0; i<4; i++)
+    {
+      k[1] = i+48;//ascii 0,1,2,3
+
+      k[0] = 'I'; //static IP
+      staticIP[i] = request->arg(k).toInt();
+
+      k[0] = 'G'; //gateway
+      staticGateway[i] = request->arg(k).toInt();
+
+      k[0] = 'S'; //subnet
+      staticSubnet[i] = request->arg(k).toInt();
+    }
+    WiFi.begin(clientSSID, clientPass);
+    int retries = 0;
+    while ((WiFi.status() != WL_CONNECTED) && (retries < 5000)) {
+      retries++;
+      delay(3000);
+      Serial.print("connection retry.... ");
+      Serial.println(retries);
+    }
+
+    if (retries > 5000) {
+       Serial.println(F("WiFi connection FAILED"));
+       request->send_P(500, "application/json", PAGE_msg_Wifi_FAILED, msgProcessorWifi);
+       return; 
+    }
+    if (WiFi.status() == WL_CONNECTED) {
+        Serial.println(F("WiFi connected!"));
+        Serial.println("IP address: ");
+        Serial.println(WiFi.localIP());
+        ipAddress = WiFi.gatewayIP().toString();
+        Serial.print("Gate way ipAddress");
+        Serial.println(ipAddress);
+        request->send_P(200, "application/json", PAGE_msg_Wifi_SUCCESS, msgProcessorWifi);
+        return;
+    }
+    request->send_P(500, "application/json", PAGE_msg_Wifi_FAILED, msgProcessorWifi);
 }
 
 
@@ -585,10 +685,11 @@ void serveSettings(AsyncWebServerRequest* request, bool post)
     } else {
       if (!s2[0]) strcpy_P(s2, s_redirecting);
 
-      serveMessage(request, 200, s, s2, (subPage == 1 || (subPage == 6 && doReboot)) ? 129 : (correctPIN ? 1 : 3));
+      serveSuccessMessage(request, 200, s, s2, (subPage == 1 || (subPage == 6 && doReboot)) ? 129 : (correctPIN ? 1 : 3));
       return;
     }
   }
+  //TODO: REMOVED UI PAGES
 
   AsyncWebServerResponse *response;
   switch (subPage)
@@ -618,4 +719,5 @@ void serveSettings(AsyncWebServerRequest* request, bool post)
   response->addHeader(FPSTR(s_content_enc),"gzip");
   setStaticContentCacheHeaders(response);
   request->send(response);
+  
 }

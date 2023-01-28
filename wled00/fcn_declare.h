@@ -376,6 +376,7 @@ bool captivePortal(AsyncWebServerRequest *request);
 void initServer();
 void serveIndexOrWelcome(AsyncWebServerRequest *request);
 void serveIndex(AsyncWebServerRequest* request);
+void serveUpdateWifi(AsyncWebServerRequest* request);
 String msgProcessor(const String& var);
 void serveMessage(AsyncWebServerRequest* request, uint16_t code, const String& headl, const String& subl="", byte optionT=255);
 String settingsProcessor(const String& var);
