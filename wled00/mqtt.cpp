@@ -80,7 +80,7 @@ void publishDeviceConnectedMessage() {
 
     char out[256];
     serializeJson(doc, out);
-    mqtt->publish(subuf, 1, false, out);
+    mqtt->publish(subuf, 0, false, out);
     Serial.println("[INFO] [onMqttConnect] : Message sent to Mqtt");
     Serial.print("[INFO] [onMqttConnect] : subur : ");
     Serial.println(subuf);
