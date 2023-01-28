@@ -24,7 +24,7 @@ function B(){window.history.back()}function RS(){window.location="/settings"}fun
 </script><style>@import url("style.css");</style></head><body><h2>%MSG%</body></html>)=====";
 
 const char PAGE_msg_Wifi_SUCCESS[] PROGMEM = R"=====({"sucess": true, "code": 200, "ipAddress" : "%MSG"})=====";
-const char PAGE_msg_Wifi_FAILED[] PROGMEM = R"=====({"sucess": failed, "code": 500})=====";
+const char PAGE_msg_Wifi_FAILED[] PROGMEM = R"=====({"sucess": true, "code": 201, "message" : "Request Accepted", "requestId" : "%requestId%""})=====";
 
 
 #ifdef WLED_ENABLE_DMX

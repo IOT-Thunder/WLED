@@ -295,7 +295,8 @@ WLED_GLOBAL IPAddress staticIP      _INIT_N(((  0,   0,  0,  0))); // static IP 
 WLED_GLOBAL IPAddress staticGateway _INIT_N(((  0,   0,  0,  0))); // gateway (router) IP
 WLED_GLOBAL IPAddress staticSubnet  _INIT_N(((255, 255, 255, 0))); // most common subnet in home networks
 WLED_GLOBAL char userId[33] _INIT("");  
-WLED_GLOBAL char requestId[33] _INIT("");  
+WLED_GLOBAL char requestId[33] _INIT("");
+WLED_GLOBAL char deviceId[33] _INIT("x");  
 #ifdef ARDUINO_ARCH_ESP32
 WLED_GLOBAL bool noWifiSleep _INIT(true);                          // disabling modem sleep modes will increase heat output and power usage, but may help with connection issues
 #else

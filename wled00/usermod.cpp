@@ -19,21 +19,28 @@ void userSetup()
 //gets called every time WiFi is (re-)connected. Initialize own network interfaces here
 void userConnected(char test[33])
 {
-    Serial.println("Inside user connected code");
+    Serial.println("[INFO] [userConnected] : Inside user connected code");
     Serial.println(test);
     mqttEnabled = true;
     strlcpy(mqttDeviceTopic,userId, 33);
     strlcpy(mqttClientID,userId, 41);
-    Serial.println("initialize mqtt");
+    Serial.println("[INFO] [userConnected] : initialize mqtt");
     initMqtt();
-    Serial.println("Mqtt init completed");
-    Serial.println(requestId);
-
+    Serial.println("[INFO] [userConnected] : Mqtt init completed");
+    Serial.print("[INFO] [userConnected] : Network IpAddress -> ");
+    Serial.println(Network.localIP());
+     Serial.print("[INFO] [userConnected] : HostName -> ");
+    Serial.println(WiFi.hostname());
+    Serial.print("[INFO] [userConnected] : MacAddress -> ");
+    Serial.println(WiFi.macAddress());
+    Serial.print("[INFO] [userConnected] : Local IP WIFI -> ");
+    Serial.println(WiFi.localIP());
     if (mqtt->connected()) {
+        Serial.println("[INFO] [userConnected] : Publishing msg to Mqtt");
         publishDeviceConnectedMessage();
-        Serial.println("Message sent to Mqtt");
+        Serial.println("[INFO] [userConnected] : Message sent to Mqtt");
     } else {
-        Serial.println("Mqtt is not connected");
+        Serial.println("[INFO] [userConnected] : Mqtt is not connected");
     }
 }
 

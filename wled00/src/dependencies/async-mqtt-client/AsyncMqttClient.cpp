@@ -807,7 +807,11 @@ uint16_t AsyncMqttClient::unsubscribe(const char* topic) {
 
 uint16_t AsyncMqttClient::publish(const char* topic, uint8_t qos, bool retain, const char* payload, size_t length, bool dup, uint16_t message_id) {
   if (!_connected) return 0;
-
+  Serial.println("[INFO] [AsyncMqttClient::publish] : Publishing message ");
+  Serial.print("[INFO] [AsyncMqttClient::publish] : Topic ");
+  Serial.print(topic);
+  Serial.println("[INFO] [AsyncMqttClient::publish] : payload ");
+  Serial.print(payload);
   char fixedHeader[5];
   fixedHeader[0] = AsyncMqttClientInternals::PacketType.PUBLISH;
   fixedHeader[0] = fixedHeader[0] << 4;

@@ -352,6 +352,7 @@ void initServer()
     serveIndexOrWelcome(request);
   });
 
+// TODO: SERVER HANDLER FOR WEBSOCKET EVENTS
   #ifdef WLED_ENABLE_WEBSOCKETS
   server.addHandler(&ws);
   #endif
@@ -475,7 +476,9 @@ String msgProcessor(const String& var)
 String msgProcessorWifi(const String& var)
 {
   if(var == "MSG") {
-    String messageBody = ipAddress;
+    return ipAddress;
+  } else if(var == "requestId") {
+    return  requestId;
   }
   return String();
 }
@@ -570,6 +573,7 @@ void serveUpdateWifi(AsyncWebServerRequest* request)
     strlcat(requestId, request->arg(F("requestId")).c_str(), 33);
     if (!isAsterisksOnly(request->arg(F("CP")).c_str(), 65)) strlcpy(clientPass, request->arg(F("CP")).c_str(), 65);
     strlcpy(cmDNS, request->arg(F("CM")).c_str(), 33);
+    strlcpy(deviceId, request->arg(F("deviceId")).c_str(), 33);
 
     apBehavior = request->arg(F("AB")).toInt();
     strlcpy(apSSID, request->arg(F("AS")).c_str(), 33);
@@ -599,7 +603,7 @@ void serveUpdateWifi(AsyncWebServerRequest* request)
     while ((WiFi.status() != WL_CONNECTED) && retries < 1) {
       retries++;
       unsigned long start=millis();
-      while(millis()-start < 1500) {
+      while(millis()-start < 1000) {
        
       };
       Serial.print("connection retry.... ");
@@ -609,7 +613,7 @@ void serveUpdateWifi(AsyncWebServerRequest* request)
     if (retries > 1 || WiFi.status() != WL_CONNECTED) {
        Serial.println(F("WiFi connection FAILED"));
        WLED::instance().enableWatchdog();
-       request->send_P(500, "application/json", PAGE_msg_Wifi_FAILED, msgProcessorWifi);
+       request->send_P(200, "application/json", PAGE_msg_Wifi_FAILED, msgProcessorWifi);
        return; 
     }
     if (WiFi.status() == WL_CONNECTED) {

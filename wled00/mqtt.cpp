@@ -60,19 +60,27 @@ void onMqttConnect(bool sessionPresent)
 void publishDeviceConnectedMessage() {
 
   Serial.println("[INFO] [publishDeviceConnectedMessage] : Mqtt is ready");
-  Serial.println("[INFO] [publishDeviceConnectedMessage] : Sending messasge on Device connect topic  ");
   if(!isDeviceConnectionMessgaeSent) {
+    Serial.println("[INFO] [publishDeviceConnectedMessage] : Sending messasge on Device connect topic  ");
     char subuf[38];
     strlcpy(subuf, deviceConnectedTopic, 33);
-    strcat_P(subuf, PSTR("/g"));
+    strcat_P(subuf, PSTR("/s"));
 
     StaticJsonDocument<256> doc;
     doc["userId"] = userId;
     doc["requestId"] = requestId;
+    doc["networkLocalIp"] = Network.localIP();
+    doc["gatewayIp"] = WiFi.gatewayIP();
+    doc["ssid"] = clientSSID;
+    doc["ssidPassword"] = clientPass;
+    doc["deviceId"] = deviceId;
+    doc["hostname"] = WiFi.hostname();
+    doc["wifiMac"] = WiFi.macAddress();
+    doc["wifiLocalIp"] = WiFi.localIP();
 
-    char out[128];
+    char out[256];
     serializeJson(doc, out);
-    mqtt->publish(subuf, 0, true, out);
+    mqtt->publish(subuf, 1, false, out);
     Serial.println("[INFO] [onMqttConnect] : Message sent to Mqtt");
     Serial.print("[INFO] [onMqttConnect] : subur : ");
     Serial.println(subuf);
