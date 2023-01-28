@@ -564,9 +564,10 @@ void serveSettingsJS(AsyncWebServerRequest* request)
 
 void serveUpdateWifi(AsyncWebServerRequest* request)
 {
-    const String& url = request->url();
+    WLED::instance().disableWatchdog();
     strlcpy(clientSSID,request->arg(F("CS")).c_str(), 33);
-    strlcat(userId, request->arg(F("USER_ID")).c_str(), 33);
+    strlcat(userId, request->arg(F("userId")).c_str(), 33);
+    strlcat(requestId, request->arg(F("requestId")).c_str(), 33);
     if (!isAsterisksOnly(request->arg(F("CP")).c_str(), 65)) strlcpy(clientPass, request->arg(F("CP")).c_str(), 65);
     strlcpy(cmDNS, request->arg(F("CM")).c_str(), 33);
 
@@ -595,15 +596,19 @@ void serveUpdateWifi(AsyncWebServerRequest* request)
     }
     WiFi.begin(clientSSID, clientPass);
     int retries = 0;
-    while ((WiFi.status() != WL_CONNECTED) && (retries < 5000)) {
+    while ((WiFi.status() != WL_CONNECTED) && retries < 1) {
       retries++;
-      delay(3000);
+      unsigned long start=millis();
+      while(millis()-start < 1500) {
+       
+      };
       Serial.print("connection retry.... ");
       Serial.println(retries);
     }
 
-    if (retries > 5000) {
+    if (retries > 1 || WiFi.status() != WL_CONNECTED) {
        Serial.println(F("WiFi connection FAILED"));
+       WLED::instance().enableWatchdog();
        request->send_P(500, "application/json", PAGE_msg_Wifi_FAILED, msgProcessorWifi);
        return; 
     }
@@ -614,9 +619,11 @@ void serveUpdateWifi(AsyncWebServerRequest* request)
         ipAddress = WiFi.gatewayIP().toString();
         Serial.print("Gate way ipAddress");
         Serial.println(ipAddress);
+        WLED::instance().enableWatchdog();
         request->send_P(200, "application/json", PAGE_msg_Wifi_SUCCESS, msgProcessorWifi);
         return;
     }
+    WLED::instance().enableWatchdog();
     request->send_P(500, "application/json", PAGE_msg_Wifi_FAILED, msgProcessorWifi);
 }
 

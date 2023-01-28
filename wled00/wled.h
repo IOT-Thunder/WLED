@@ -295,6 +295,7 @@ WLED_GLOBAL IPAddress staticIP      _INIT_N(((  0,   0,  0,  0))); // static IP 
 WLED_GLOBAL IPAddress staticGateway _INIT_N(((  0,   0,  0,  0))); // gateway (router) IP
 WLED_GLOBAL IPAddress staticSubnet  _INIT_N(((255, 255, 255, 0))); // most common subnet in home networks
 WLED_GLOBAL char userId[33] _INIT("");  
+WLED_GLOBAL char requestId[33] _INIT("");  
 #ifdef ARDUINO_ARCH_ESP32
 WLED_GLOBAL bool noWifiSleep _INIT(true);                          // disabling modem sleep modes will increase heat output and power usage, but may help with connection issues
 #else
@@ -409,13 +410,15 @@ WLED_GLOBAL bool e131SkipOutOfSequence _INIT(false);              // freeze inst
 WLED_GLOBAL uint16_t pollReplyCount _INIT(0);                     // count number of replies for ArtPoll node report
 
 WLED_GLOBAL bool mqttEnabled _INIT(false);
-WLED_GLOBAL char mqttDeviceTopic[33] _INIT("");            // main MQTT topic (individual per device, default is wled/mac)
-WLED_GLOBAL char mqttGroupTopic[33] _INIT("wled/all");     // second MQTT topic (for example to group devices)
-WLED_GLOBAL char mqttServer[33] _INIT("");                 // both domains and IPs should work (no SSL)
-WLED_GLOBAL char mqttUser[41] _INIT("");                   // optional: username for MQTT auth
-WLED_GLOBAL char mqttPass[65] _INIT("");                   // optional: password for MQTT auth
-WLED_GLOBAL char mqttClientID[41] _INIT("");               // override the client ID
+WLED_GLOBAL char mqttDeviceTopic[33] _INIT("/thunder/device");            // main MQTT topic (individual per device, default is wled/mac)
+WLED_GLOBAL char mqttGroupTopic[33] _INIT("/thunder/all");     // second MQTT topic (for example to group devices)
+WLED_GLOBAL char mqttServer[33] _INIT("192.168.68.120");                 // both domains and IPs should work (no SSL)
+WLED_GLOBAL char mqttUser[41] _INIT("hitesh");                   // optional: username for MQTT auth
+WLED_GLOBAL char mqttPass[65] _INIT("sia@2017@sia");                   // optional: password for MQTT auth
+WLED_GLOBAL char mqttClientID[41] _INIT("user");               // override the client ID
 WLED_GLOBAL uint16_t mqttPort _INIT(1883);
+WLED_GLOBAL char deviceConnectedTopic[33] _INIT("/thunder/deviceConnected");  
+WLED_GLOBAL bool isDeviceConnectionMessgaeSent _INIT(false);  
 
 #ifndef WLED_DISABLE_HUESYNC
 WLED_GLOBAL bool huePollingEnabled _INIT(false);           // poll hue bridge for light state
@@ -595,7 +598,7 @@ WLED_GLOBAL bool useMainSegmentOnly _INIT(false);
 WLED_GLOBAL unsigned long lastMqttReconnectAttempt _INIT(0);
 WLED_GLOBAL unsigned long lastInterfaceUpdate _INIT(0);
 WLED_GLOBAL byte interfaceUpdateCallMode _INIT(CALL_MODE_INIT);
-WLED_GLOBAL char mqttStatusTopic[40] _INIT("");        // this must be global because of async handlers
+WLED_GLOBAL char mqttStatusTopic[40] _INIT("/status");        // this must be global because of async handlers
 
 // alexa udp
 WLED_GLOBAL String escapedMac;

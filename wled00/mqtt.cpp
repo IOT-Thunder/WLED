@@ -23,9 +23,13 @@ void parseMQTTBriPayload(char* payload)
 void onMqttConnect(bool sessionPresent)
 {
   //(re)subscribe to required topics
+  Serial.print("[INFO] [onMqttConnect] : onMqttConnect is executed");
   char subuf[38];
-
+  Serial.print("[INFO] [onMqttConnect] : mqtt Client id : ");
+  Serial.println(mqttClientID);
   if (mqttDeviceTopic[0] != 0) {
+    Serial.print("[INFO] [onMqttConnect] : Device Topic checked here : ");
+    Serial.println(mqttDeviceTopic);
     strlcpy(subuf, mqttDeviceTopic, 33);
     mqtt->subscribe(subuf, 0);
     strcat_P(subuf, PSTR("/col"));
@@ -49,6 +53,32 @@ void onMqttConnect(bool sessionPresent)
 
   doPublishMqtt = true;
   DEBUG_PRINTLN(F("MQTT ready"));
+  publishDeviceConnectedMessage();
+  
+}
+
+void publishDeviceConnectedMessage() {
+
+  Serial.println("[INFO] [publishDeviceConnectedMessage] : Mqtt is ready");
+  Serial.println("[INFO] [publishDeviceConnectedMessage] : Sending messasge on Device connect topic  ");
+  if(!isDeviceConnectionMessgaeSent) {
+    char subuf[38];
+    strlcpy(subuf, deviceConnectedTopic, 33);
+    strcat_P(subuf, PSTR("/g"));
+
+    StaticJsonDocument<256> doc;
+    doc["userId"] = userId;
+    doc["requestId"] = requestId;
+
+    char out[128];
+    serializeJson(doc, out);
+    mqtt->publish(subuf, 0, true, out);
+    Serial.println("[INFO] [onMqttConnect] : Message sent to Mqtt");
+    Serial.print("[INFO] [onMqttConnect] : subur : ");
+    Serial.println(subuf);
+    isDeviceConnectionMessgaeSent = true;
+  }
+  
 }
 
 
@@ -116,7 +146,14 @@ void publishMqtt()
   doPublishMqtt = false;
   if (!WLED_MQTT_CONNECTED) return;
   DEBUG_PRINTLN(F("Publish MQTT"));
+  
+  StaticJsonDocument<256> doc;
+  doc["userId"] = userId;
+  doc["requestId"] = requestId;
+  doc["online"] = "online";
 
+  char out[128];
+  
   #ifndef USERMOD_SMARTNEST
   char s[10];
   char subuf[38];
@@ -124,7 +161,9 @@ void publishMqtt()
   sprintf_P(s, PSTR("%u"), bri);
   strlcpy(subuf, mqttDeviceTopic, 33);
   strcat_P(subuf, PSTR("/g"));
-  mqtt->publish(subuf, 0, true, s);         // retain message
+  doc["bri"] = s;
+  serializeJson(doc, out);
+  mqtt->publish(subuf, 0, true, out);         // retain message
 
   sprintf_P(s, PSTR("#%06X"), (col[3] << 24) | (col[0] << 16) | (col[1] << 8) | (col[2]));
   strlcpy(subuf, mqttDeviceTopic, 33);
@@ -133,7 +172,7 @@ void publishMqtt()
 
   strlcpy(subuf, mqttDeviceTopic, 33);
   strcat_P(subuf, PSTR("/status"));
-  mqtt->publish(subuf, 0, true, "online");  // retain message for a LWT
+  mqtt->publish(subuf, 0, true, out);  // retain message for a LWT
 
   char apires[1024];                        // allocating 1024 bytes from stack can be risky
   XML_response(nullptr, apires);
@@ -143,21 +182,36 @@ void publishMqtt()
   #endif
 }
 
-
 //HA autodiscovery was removed in favor of the native integration in HA v0.102.0
 
 bool initMqtt()
 {
-  if (!mqttEnabled || mqttServer[0] == 0 || !WLED_CONNECTED) return false;
+  if (!mqttEnabled || mqttServer[0] == 0 || !WLED_CONNECTED) {
+    Serial.println("[INFO] [bool initMqtt()] : Mqtt is not connected due to");
+    Serial.print("[INFO] [bool initMqtt()] : mqttEnabled: ");
+    Serial.println(mqttEnabled);
+    Serial.print("[INFO] [bool initMqtt()] : mqttServer[0]: ");
+    Serial.println(mqttServer[0]);
+    Serial.print("[INFO] [bool initMqtt()] : WLED_CONNECTED : ");
+    Serial.println(WLED_CONNECTED);
+
+    return false;
+  } 
 
   if (mqtt == nullptr) {
+    Serial.print("Mqtt is Null");
     mqtt = new AsyncMqttClient();
     mqtt->onMessage(onMqttMessage);
     mqtt->onConnect(onMqttConnect);
   }
-  if (mqtt->connected()) return true;
+  if (mqtt->connected()) {
+      Serial.println("[INFO] [bool initMqtt()] : Mqtt is now connected");
+      publishDeviceConnectedMessage();
+      return true;
+    }
 
   DEBUG_PRINTLN(F("Reconnecting MQTT"));
+  Serial.print("[INFO] [bool initMqtt()] : Mqtt ReConnecting");
   IPAddress mqttIP;
   if (mqttIP.fromString(mqttServer)) //see if server is IP or domain
   {

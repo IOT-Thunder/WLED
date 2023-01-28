@@ -398,7 +398,7 @@ void WLED::setup()
   usermods.setup();
 
   if (strcmp(clientSSID, DEFAULT_CLIENT_SSID) == 0)
-    showWelcomePage = true;
+    showWelcomePage = false;
   WiFi.persistent(false);
   #ifdef WLED_USE_ETHERNET
   WiFi.onEvent(WiFiEvent);
@@ -408,7 +408,7 @@ void WLED::setup()
   //Serial RX (Adalight, Improv, Serial JSON) only possible if GPIO3 unused
   //Serial TX (Debug, Improv, Serial JSON) only possible if GPIO1 unused
   if (!pinManager.isPinAllocated(hardwareRX) && !pinManager.isPinAllocated(hardwareTX)) {
-    Serial.println(F("Ada"));
+    //Serial.println(F("Ada"));
   }
   #endif
 
@@ -616,8 +616,11 @@ void WLED::initConnection()
 #endif
 
   if (staticIP[0] != 0 && staticGateway[0] != 0) {
+    Serial.print("Connecting to wifi using static Address");
+    Serial.println(staticIP);
     WiFi.config(staticIP, staticGateway, staticSubnet, IPAddress(1, 1, 1, 1));
   } else {
+    Serial.print("Connecting to wifi using IP Address");
     WiFi.config(IPAddress((uint32_t)0), IPAddress((uint32_t)0), IPAddress((uint32_t)0));
   }
 
@@ -731,7 +734,7 @@ void WLED::handleConnection()
     return;
 
   if (lastReconnectAttempt == 0) {
-    DEBUG_PRINTLN(F("lastReconnectAttempt == 0"));
+    Serial.println("lastReconnectAttempt == 0");
     initConnection();
     return;
   }
@@ -808,7 +811,9 @@ void WLED::handleConnection()
       if (improvActive > 1) sendImprovRPCResponse(0x01);
     }
     initInterfaces();
-    userConnected();
+    ws = AsyncWebSocket("wss://demo.piesocket.com/v3/channel_123?api_key=VCXCEuvhGcBDP7XhiJJUDvR1e1D3eiVjgZ9VRiaV&notify_self");
+    Serial.println("Websocket is connected");
+    userConnected(requestId);
     usermods.connected();
     lastMqttReconnectAttempt = 0; // force immediate update
 

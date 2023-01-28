@@ -167,6 +167,7 @@ void parseLxJson(int lxValue, byte segId, bool secondary);
 //mqtt.cpp
 bool initMqtt();
 void publishMqtt();
+void publishDeviceConnectedMessage();
 
 //ntp.cpp
 void handleTime();
@@ -312,7 +313,7 @@ void registerUsermods();
 
 //usermod.cpp
 void userSetup();
-void userConnected();
+void userConnected(char requestId[33]);
 void userLoop();
 
 //util.cpp

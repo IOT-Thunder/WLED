@@ -13,13 +13,28 @@
 //gets called once at boot. Do all initialization that doesn't depend on network here
 void userSetup()
 {
- Serial.print("Inside User Setup");
+ 
 }
 
 //gets called every time WiFi is (re-)connected. Initialize own network interfaces here
-void userConnected()
+void userConnected(char test[33])
 {
     Serial.println("Inside user connected code");
+    Serial.println(test);
+    mqttEnabled = true;
+    strlcpy(mqttDeviceTopic,userId, 33);
+    strlcpy(mqttClientID,userId, 41);
+    Serial.println("initialize mqtt");
+    initMqtt();
+    Serial.println("Mqtt init completed");
+    Serial.println(requestId);
+
+    if (mqtt->connected()) {
+        publishDeviceConnectedMessage();
+        Serial.println("Message sent to Mqtt");
+    } else {
+        Serial.println("Mqtt is not connected");
+    }
 }
 
 //loop. You can use "if (WLED_CONNECTED)" to check for successful connection
@@ -27,6 +42,6 @@ void userLoop()
 {
     //Serial.print("Inside User Loop");
     if (WLED_CONNECTED) {
-        Serial.print("Inside User Loop wifi connected");
+        //Serial.println(test);
     }
 }
