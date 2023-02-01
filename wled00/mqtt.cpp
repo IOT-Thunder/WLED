@@ -64,7 +64,7 @@ void publishDeviceConnectedMessage() {
     Serial.println("[INFO] [publishDeviceConnectedMessage] : Sending messasge on Device connect topic  ");
     char subuf[38];
     strlcpy(subuf, deviceConnectedTopic, 33);
-    strcat_P(subuf, PSTR("/s"));
+    //strcat_P(subuf, PSTR("/s"));
 
     StaticJsonDocument<256> doc;
     doc["userId"] = userId;
@@ -77,6 +77,7 @@ void publishDeviceConnectedMessage() {
     doc["hostname"] = WiFi.hostname();
     doc["wifiMac"] = WiFi.macAddress();
     doc["wifiLocalIp"] = WiFi.localIP();
+    doc["type"] = "DEVICE_CONNECTED";
 
     char out[256];
     serializeJson(doc, out);
@@ -159,7 +160,7 @@ void publishMqtt()
   doc["userId"] = userId;
   doc["requestId"] = requestId;
   doc["online"] = "online";
-
+  doc["type"] = "DEVICE_STATUS";
   char out[128];
   
   #ifndef USERMOD_SMARTNEST
@@ -168,25 +169,26 @@ void publishMqtt()
 
   sprintf_P(s, PSTR("%u"), bri);
   strlcpy(subuf, mqttDeviceTopic, 33);
-  strcat_P(subuf, PSTR("/g"));
+  //strcat_P(subuf, PSTR("/g"));
   doc["bri"] = s;
-  serializeJson(doc, out);
-  mqtt->publish(subuf, 0, true, out);         // retain message
+  //serializeJson(doc, out);
+  //mqtt->publish(subuf, 0, true, out);         // retain message
 
   sprintf_P(s, PSTR("#%06X"), (col[3] << 24) | (col[0] << 16) | (col[1] << 8) | (col[2]));
-  strlcpy(subuf, mqttDeviceTopic, 33);
-  strcat_P(subuf, PSTR("/c"));
+  //strlcpy(subuf, mqttDeviceTopic, 33);
+  //strcat_P(subuf, PSTR("/c"));
+  doc["color"] = s;
   mqtt->publish(subuf, 0, true, s);         // retain message
 
   strlcpy(subuf, mqttDeviceTopic, 33);
   strcat_P(subuf, PSTR("/status"));
   mqtt->publish(subuf, 0, true, out);  // retain message for a LWT
 
-  char apires[1024];                        // allocating 1024 bytes from stack can be risky
-  XML_response(nullptr, apires);
-  strlcpy(subuf, mqttDeviceTopic, 33);
-  strcat_P(subuf, PSTR("/v"));
-  mqtt->publish(subuf, 0, false, apires);   // do not retain message
+  //char apires[1024];                        // allocating 1024 bytes from stack can be risky
+  //XML_response(nullptr, apires);
+  //strlcpy(subuf, mqttDeviceTopic, 33);
+  //strcat_P(subuf, PSTR("/v"));
+  //mqtt->publish(subuf, 0, false, apires);   // do not retain message
   #endif
 }
 

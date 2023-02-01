@@ -411,8 +411,8 @@ WLED_GLOBAL bool e131SkipOutOfSequence _INIT(false);              // freeze inst
 WLED_GLOBAL uint16_t pollReplyCount _INIT(0);                     // count number of replies for ArtPoll node report
 
 WLED_GLOBAL bool mqttEnabled _INIT(false);
-WLED_GLOBAL char mqttDeviceTopic[33] _INIT("/thunder/device");            // main MQTT topic (individual per device, default is wled/mac)
-WLED_GLOBAL char mqttGroupTopic[33] _INIT("/thunder/all");     // second MQTT topic (for example to group devices)
+WLED_GLOBAL char mqttDeviceTopic[33] _INIT("/thunder/device/");            // main MQTT topic (individual per device, default is wled/mac)
+WLED_GLOBAL char mqttGroupTopic[33] _INIT("/thunder/all/");     // second MQTT topic (for example to group devices)
 WLED_GLOBAL char mqttServer[33] _INIT("192.168.68.120");                 // both domains and IPs should work (no SSL)
 WLED_GLOBAL char mqttUser[41] _INIT("hitesh");                   // optional: username for MQTT auth
 WLED_GLOBAL char mqttPass[65] _INIT("sia@2017@sia");                   // optional: password for MQTT auth

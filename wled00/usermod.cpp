@@ -22,8 +22,15 @@ void userConnected(char test[33])
     Serial.println("[INFO] [userConnected] : Inside user connected code");
     Serial.println(test);
     mqttEnabled = true;
-    strlcpy(mqttDeviceTopic,userId, 33);
     strlcpy(mqttClientID,userId, 41);
+    //strlcpy(mqttDeviceTopic, userId, 33);
+    strlcpy(mqttClientID, userId, 41);
+    strcat_P(mqttDeviceTopic, userId);
+    strcat_P(mqttGroupTopic, userId);
+    Serial.println("[INFO] [userConnected] : MQTT DEVICE TOPIC : ");
+    Serial.print(mqttDeviceTopic);
+    Serial.println("[INFO] [userConnected] : MQTT GROUP TOPIC : ");
+    Serial.print(mqttGroupTopic);
     Serial.println("[INFO] [userConnected] : initialize mqtt");
     initMqtt();
     Serial.println("[INFO] [userConnected] : Mqtt init completed");
