@@ -63,10 +63,9 @@ void publishDeviceConnectedMessage() {
   if(!isDeviceConnectionMessgaeSent) {
     Serial.println("[INFO] [publishDeviceConnectedMessage] : Sending messasge on Device connect topic  ");
     char subuf[38];
+    char value[33];
     strlcpy(subuf, deviceConnectedTopic, 33);
-    //strcat_P(subuf, PSTR("/s"));
-
-    StaticJsonDocument<256> doc;
+    StaticJsonDocument<320> doc;
     doc["userId"] = userId;
     doc["requestId"] = requestId;
     doc["networkLocalIp"] = Network.localIP();
@@ -77,10 +76,15 @@ void publishDeviceConnectedMessage() {
     doc["hostname"] = WiFi.hostname();
     doc["wifiMac"] = WiFi.macAddress();
     doc["wifiLocalIp"] = WiFi.localIP();
-    doc["type"] = "DEVICE_CONNECTED";
+    strlcpy(value, "DEVICE_CONNECTED", 33);
+    Serial.print("[INFO] [publishDeviceConnectedMessage] : Value = ")
+    Serial.println(value)
+    doc["msgType"] = value;
 
-    char out[256];
+    char out[320];
     serializeJson(doc, out);
+    Serial.println("[INFO] [publishDeviceConnectedMessage] : message is : ");
+    Serial.println(out);
     mqtt->publish(subuf, 0, false, out);
     Serial.println("[INFO] [onMqttConnect] : Message sent to Mqtt");
     Serial.print("[INFO] [onMqttConnect] : subur : ");
@@ -95,6 +99,10 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
 
   DEBUG_PRINT(F("MQTT msg: "));
   DEBUG_PRINTLN(topic);
+  Serial.print("[INFO] [onMqttMessage] : MQTT MSG: ");
+  Serial.println(payload);
+  Serial.print("[INFO] [onMqttMessage] : MQTT Topic: ");
+  Serial.println(topic);
 
   // paranoia check to avoid npe if no payload
   if (payload==nullptr) {
@@ -155,40 +163,28 @@ void publishMqtt()
   doPublishMqtt = false;
   if (!WLED_MQTT_CONNECTED) return;
   DEBUG_PRINTLN(F("Publish MQTT"));
-  
-  StaticJsonDocument<256> doc;
-  doc["userId"] = userId;
-  doc["requestId"] = requestId;
-  doc["online"] = "online";
-  doc["type"] = "DEVICE_STATUS";
-  char out[128];
-  
+  Serial.println("[INFO] [publishMqtt]");
   #ifndef USERMOD_SMARTNEST
-  char s[10];
-  char subuf[38];
-
-  sprintf_P(s, PSTR("%u"), bri);
-  strlcpy(subuf, mqttDeviceTopic, 33);
-  //strcat_P(subuf, PSTR("/g"));
-  doc["bri"] = s;
-  //serializeJson(doc, out);
-  //mqtt->publish(subuf, 0, true, out);         // retain message
-
-  sprintf_P(s, PSTR("#%06X"), (col[3] << 24) | (col[0] << 16) | (col[1] << 8) | (col[2]));
-  //strlcpy(subuf, mqttDeviceTopic, 33);
-  //strcat_P(subuf, PSTR("/c"));
-  doc["color"] = s;
-  mqtt->publish(subuf, 0, true, s);         // retain message
-
-  strlcpy(subuf, mqttDeviceTopic, 33);
-  strcat_P(subuf, PSTR("/status"));
-  mqtt->publish(subuf, 0, true, out);  // retain message for a LWT
-
-  //char apires[1024];                        // allocating 1024 bytes from stack can be risky
-  //XML_response(nullptr, apires);
-  //strlcpy(subuf, mqttDeviceTopic, 33);
-  //strcat_P(subuf, PSTR("/v"));
-  //mqtt->publish(subuf, 0, false, apires);   // do not retain message
+    char s[10];
+    char subuf[38];
+    char out[256];
+    char value[33];
+    StaticJsonDocument<256> doc;
+    doc["userId"] = userId;
+    strlcpy(value, "online", 33);
+    doc["online"] = value;
+    strlcpy(value, "DEVICE_STATUS", 33);
+    doc["msgType"] =  value;
+    sprintf_P(s, PSTR("%u"), bri);
+    doc["bri"] = s;
+    sprintf_P(s, PSTR("#%06X"), (col[3] << 24) | (col[0] << 16) | (col[1] << 8) | (col[2]));
+    doc["color"] = s;
+    strlcpy(subuf, mqttDeviceTopic, 33);
+    strcat_P(subuf, PSTR("/status"));
+    serializeJson(doc, out);
+    Serial.println("[INFO] [publishMqtt] : Status message is : ");
+    Serial.println(out);
+    mqtt->publish(subuf, 0, true, out);
   #endif
 }
 
