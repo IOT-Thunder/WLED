@@ -65,7 +65,7 @@ void publishDeviceConnectedMessage() {
     char subuf[38];
     char value[33];
     strlcpy(subuf, deviceConnectedTopic, 33);
-    StaticJsonDocument<320> doc;
+    StaticJsonDocument<512> doc;
     doc["userId"] = userId;
     doc["requestId"] = requestId;
     doc["networkLocalIp"] = Network.localIP();
@@ -77,11 +77,11 @@ void publishDeviceConnectedMessage() {
     doc["wifiMac"] = WiFi.macAddress();
     doc["wifiLocalIp"] = WiFi.localIP();
     strlcpy(value, "DEVICE_CONNECTED", 33);
-    Serial.print("[INFO] [publishDeviceConnectedMessage] : Value = ")
-    Serial.println(value)
+    Serial.print("[INFO] [publishDeviceConnectedMessage] : Value = ");
+    Serial.println(value);
     doc["msgType"] = value;
 
-    char out[320];
+    char out[512];
     serializeJson(doc, out);
     Serial.println("[INFO] [publishDeviceConnectedMessage] : message is : ");
     Serial.println(out);

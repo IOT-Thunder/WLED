@@ -84,19 +84,19 @@ void createEditHandler(bool enable) {
 
 bool captivePortal(AsyncWebServerRequest *request)
 {
-  if (ON_STA_FILTER(request)) return false; //only serve captive in AP mode
+  if (ON_STA_FILTER(request)) return true; //only serve captive in AP mode
   String hostH;
-  if (!request->hasHeader("Host")) return false;
+  if (!request->hasHeader("Host")) return true;
   hostH = request->getHeader("Host")->value();
 
   if (!isIp(hostH) && hostH.indexOf("wled.me") < 0 && hostH.indexOf(cmDNS) < 0) {
     DEBUG_PRINTLN("Captive portal");
-    AsyncWebServerResponse *response = request->beginResponse(302);
-    response->addHeader(F("Location"), F("http://4.3.2.1"));
-    request->send(response);
+    // AsyncWebServerResponse *response = request->beginResponse(302);
+    // response->addHeader(F("Location"), F("http://4.3.2.1"));
+    // request->send(response);
     return true;
   }
-  return false;
+  return true;
 }
 
 void initServer()
@@ -349,7 +349,8 @@ void initServer()
   //TODO REMOVED INDEX PAGE
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
     if (captivePortal(request)) return;
-    serveIndexOrWelcome(request);
+    //serveIndexOrWelcome(request);
+    return;
   });
 
 // TODO: SERVER HANDLER FOR WEBSOCKET EVENTS
